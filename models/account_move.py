@@ -41,7 +41,9 @@ class CustomAccountMove(models.Model):
 
             cfdi_node = self.env['l10n_mx_edi.document']._decode_cfdi_attachment(edi_content.raw)
             if cfdi_node.get('uuid'):
-                if self.env['account.move'].search([('l10n_mx_edi_cfdi_uuid','=',cfdi_node.get('uuid'))], limit=1):
+                print("UUID")
+                print(cfdi_node.get('uuid'))
+                if len(self.env['account.move'].search([('l10n_mx_edi_cfdi_uuid','=',cfdi_node.get('uuid'))])) > 1:
                     raise UserError("Ya existe una factura con ese mismo XML")
             root = ET.fromstring(base64.b64decode(edi_content.datas))
             
