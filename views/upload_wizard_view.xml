@@ -1,0 +1,27 @@
+<odoo>
+    <record id="view_upload_wizard_form" model="ir.ui.view">
+        <field name="name">xml.upload.wizard.form</field>
+        <field name="model">xml.upload.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Upload Wizard">
+                <sheet>
+                    <group>
+                        <field name="file_name" invisible="1"/>
+                        <field name="file" filename="file_name"/>
+                    </group>
+                </sheet>
+                <footer>
+                    <button string="Subir" type="object" name="action_submit" class="btn-primary" />
+                    <button string="Cancelar" class="btn-secondary" special="cancel" />
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_upload_wizard" model="ir.actions.act_window">
+        <field name="name">Upload Wizard</field>
+        <field name="res_model">xml.upload.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</odoo>
