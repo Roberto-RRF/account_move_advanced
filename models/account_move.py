@@ -29,6 +29,7 @@ class CustomAccountMove(models.Model):
         edi = self.env['l10n_mx_edi.document']
         edi_content = self.attachment_ids.filtered(lambda m: m.mimetype == 'application/xml')
         if edi_content:
+
             edi_data = {
                 'state' : 'invoice_sent',
                 'datetime': fields.Datetime.now(),
@@ -39,6 +40,9 @@ class CustomAccountMove(models.Model):
             new_edi_doc.invoice_ids = [(6, 0, [self.id])]
 
             cfdi_node = self.env['l10n_mx_edi.document']._decode_cfdi_attachment(edi_content.raw)
+            if cfdi_node.get('uuid'):
+                if self.env['account.move'].search([('l10n_mx_edi_cfdi_uuid','=',cfdi_node.get('uuid'))], limit=1):
+                    raise UserError("Ya existe una factura con ese mismo XML")
             root = ET.fromstring(base64.b64decode(edi_content.datas))
             
             ref = (root.get('Serie') + '/' if root.get('Serie') else '') + (root.get('Folio') if root.get('Folio') else '')
