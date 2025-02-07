@@ -7,17 +7,18 @@ class XmlUploadWizard(models.TransientModel):
 
     file = fields.Binary('Archivo XML')
     file_name = fields.Char('Nombre Archivo')
-
     move_id = fields.Many2one('account.move', string='Move', required=True)
 
     def action_submit(self):
-        attachment_values = {
-            'name': self.file_name, 
+        # Crea el attachment y lo captura en la variable 'attachment'
+        attachment = self.env['ir.attachment'].create({
+            'name': self.file_name,
             'datas': self.file,
             'res_model': 'account.move',
             'res_id': self.move_id.id,
             'mimetype': 'application/xml',
-        }
-        self.env['ir.attachment'].create(attachment_values)
-        self.move_id.fill_xml_values_from_attatchment()
+        })
+
+        # Llama al método pasando el attachment creado
+        self.move_id.fill_xml_values_from_attatchment(attachment)
         return

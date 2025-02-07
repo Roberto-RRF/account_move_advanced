@@ -13,6 +13,13 @@
                     class="btn-success"
                     invisible="move_type != 'in_invoice' or wizard_imported"
                 />
+
+                <button 
+                    name="action_erase_fields"
+                    string="Volver a subir XML"
+                    type="object"
+                    invisible="move_type != 'in_invoice' or not wizard_imported"
+                />
                 <field name="wizard_imported" invisible="1"/>
  
             </xpath>
