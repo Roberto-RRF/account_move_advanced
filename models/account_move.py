@@ -26,6 +26,14 @@ class CustomAccountMove(models.Model):
             'target': 'new',
             'context': {'default_move_id': self.id},
         }
+    
+    def action_reset_to_draft(self):
+        if self.move_type == 'in_invoice' and self.payment_state not in ['paid','partial']:
+            self.state='draft'
+        else: 
+            raise UserError("Esta factura no se puede regresar a borrador; asegúrese de romper las conciliaciones antes.")
+            
+
 
     def action_erase_fields(self):
         self.cfdi_payment_method = ""
@@ -66,6 +74,8 @@ class CustomAccountMove(models.Model):
                 ('code', '=', root.get('FormaPago'))
             ])
             self.cfdi_usgae = cfdi_node.get('usage')
+            self.invoice_date = cfdi_node.get('stamp_date')
+            self.ref = (root.get('Serie') + '/' if root.get('Serie') else '') + (root.get('Folio') if root.get('Folio') else '')
             self.wizard_imported = True
 
             # Validación modificada
