@@ -68,15 +68,6 @@ class CustomAccountMove(models.Model):
             )
 
         try:
-            # Asignar campos básicos desde el XML
-            self.cfdi_payment_method = cfdi_node.get('payment_method')
-            self.cfdi_payment_form = self.env['l10n_mx_edi.payment.method'].search([
-                ('code', '=', root.get('FormaPago'))
-            ])
-            self.cfdi_usgae = cfdi_node.get('usage')
-            self.invoice_date = cfdi_node.get('stamp_date')
-            self.ref = (root.get('Serie') + '/' if root.get('Serie') else '') + (root.get('Folio') if root.get('Folio') else '')
-            self.wizard_imported = True
 
             # Validación modificada
             errors = self._validate_invoice_xml_data(root, cfdi_node)
@@ -97,6 +88,16 @@ class CustomAccountMove(models.Model):
                 else:
                     self.message_post(body="Advertencias de validación: %s" % '\n'.join(errors))
 
+            # Asignar campos básicos desde el XML
+            self.cfdi_payment_method = cfdi_node.get('payment_method')
+            self.cfdi_payment_form = self.env['l10n_mx_edi.payment.method'].search([
+                ('code', '=', root.get('FormaPago'))
+            ])
+            self.cfdi_usgae = cfdi_node.get('usage')
+            
+            self.invoice_date = root.get('Fecha')
+            self.ref = (root.get('Serie') + '/' if root.get('Serie') else '') + (root.get('Folio') if root.get('Folio') else '')
+            self.wizard_imported = True
             # Resto del código si la validación es exitosa
             self._validate_invoice_xml_data(root, cfdi_node)
 
@@ -109,13 +110,13 @@ class CustomAccountMove(models.Model):
         xml_amount_total = float(cfdi_node.get('amount_total'))
         xml_amount_subtotal = float(root.get('SubTotal'))
 
-        # if self.partner_id.vat != xml_rfc:
-        #     raise UserError("El RFC del proveedor en la factura (%s) no coincide con el RFC del XML (%s)." % (self.partner_id.vat, xml_rfc))
+        if self.partner_id.vat != xml_rfc:
+            raise UserError("El RFC del proveedor en la factura (%s) no coincide con el RFC del XML (%s)." % (self.partner_id.vat, xml_rfc))
 
         if round(self.amount_untaxed, 2) != round(xml_amount_subtotal, 2):
             errors.append("El subtotal de la factura (%.2f) no coincide con el subtotal indicado en el XML (%.2f)." % (self.amount_untaxed, xml_amount_subtotal))
 
-        # if round(self.amount_total, 2) != round(xml_amount_total, 2):
-        #     raise UserError("El total de la factura (%.2f) no coincide con el total indicado en el XML (%.2f)." % (self.amount_total, xml_amount_total))
+        if round(self.amount_total, 2) != round(xml_amount_total, 2):
+            raise UserError("El total de la factura (%.2f) no coincide con el total indicado en el XML (%.2f)." % (self.amount_total, xml_amount_total))
 
         return errors
